@@ -177,14 +177,26 @@ export default function App(){
   ];
 
   /** Predefined Images (stickers) in /public/predefined */
-  const predefinedImages: PredefItem[] = [
-    // Drop your PNG/JPGs into /public/predefined and add them here:
-    { name: "MoG Face Clean",      url: "/predefined/mog-face.png" },
-    { name: "Sunglasses (PNG)",    url: "/predefined/sunglasses.png" },
-    { name: "Speech Bubble 1",     url: "/predefined/speech-bubble-1.png" },
-    { name: "Arrow Thick",         url: "/predefined/arrow-thick.png" },
-    { name: "Starburst Yellow",    url: "/predefined/starburst-yellow.png" }
-  ];
+// Predefined Images (stickers) in /public/predefined
+const predefinedImages: PredefItem[] = [
+  { name: "pic1",  url: "/predefined/pic1.png"  },
+  { name: "pic2",  url: "/predefined/pic2.png"  },
+  { name: "pic3",  url: "/predefined/pic3.png"  },
+  { name: "pic4",  url: "/predefined/pic4.png"  },
+  { name: "pic5",  url: "/predefined/pic5.png"  },
+  { name: "pic6",  url: "/predefined/pic6.png"  },
+  { name: "pic7",  url: "/predefined/pic7.png"  },
+  { name: "pic8",  url: "/predefined/pic8.png"  },
+  { name: "pic9",  url: "/predefined/pic9.png"  },
+  { name: "pic10", url: "/predefined/pic10.png" },
+  { name: "pic11", url: "/predefined/pic11.png" },
+  { name: "pic12", url: "/predefined/pic12.png" },
+  { name: "pic13", url: "/predefined/pic13.jpg" },  // JPG per your folder
+  { name: "pic14", url: "/predefined/pic14.png" },
+  { name: "pic15", url: "/predefined/pic15.png" },
+  { name: "pic17", url: "/predefined/pic17.png" },
+];
+
 
   const addTextLayer=()=>{ const l:TextLayer={id:uid("text"),type:"text",name:"Text",x:0.5,y:0.5,scale:1,opacity:1,text:"NEW TEXT",fontSize:72,strokePx:12,letterSpacing:0,allCaps:true,visible:true}; setLayers(p=>[...p,l]); setSelectedId(l.id); };
   const addImageSticker=(file:File)=>{ if(!file?.type.startsWith("image/")) return; const url=URL.createObjectURL(file); const l:ImageLayer={id:uid("img"),type:"image",name:file.name||"Sticker",src:url,x:0.5,y:0.5,scale:0.6,opacity:1,visible:true}; setLayers(p=>[...p,l]); setSelectedId(l.id); };
