@@ -164,7 +164,7 @@ export default function App(){
     { name: "Black",          url: "/templates/black.jpg" },
     // Your custom MoG templates
     { name: "Template 1", url: "/templates/mogtemplate1.jpg" },
-    { name: "Template 2", url: "/templates/mogtemplate2.jpg" },
+    { name: "Template 2", url: "/templates/mogtemplate2.png" },
     { name: "Template 3", url: "/templates/mogtemplate3.jpg" },
     { name: "Template 4", url: "/templates/mogtemplate4.png" },
     { name: "Template 5", url: "/templates/mogtemplate5.png" },
