@@ -13,6 +13,9 @@ type TextLayer = LayerBase & { type: "text"; text: string; fontSize: number; str
 type ImageLayer = LayerBase & { type: "image"; src: string };
 type Layer = FaceLayer | TextLayer | ImageLayer;
 
+/** Optional: predefined image item type */
+type PredefItem = { name: string; url: string };
+
 const MOG_FACE_SVG = encodeURIComponent(`
   <svg xmlns='http://www.w3.org/2000/svg' width='800' height='800' viewBox='0 0 800 800'>
     <g stroke='black' stroke-width='8' fill='none' stroke-linecap='round' stroke-linejoin='round'>
@@ -62,7 +65,7 @@ function orientedRectBBox(cx:number, cy:number, w:number, h:number, rotDeg:numbe
   const a=(rotDeg||0)*Math.PI/180, cos=Math.cos(a), sin=Math.sin(a), hw=w/2, hh=h/2;
   const pts=[[-hw,-hh],[hw,-hh],[hw,hh],[-hw,hh]].map(([x,y])=>({x:cx+x*cos-y*sin,y:cy+x*sin+y*cos}));
   const xs=pts.map(p=>p.x), ys=pts.map(p=>p.y);
-  return {x:Math.min(*xs), y:Math.min(*ys), w:Math.max(*xs)-Math.min(*xs), h:Math.max(*ys)-Math.min(*ys)};
+  return {x:Math.min(...xs), y:Math.min(...ys), w:Math.max(...xs)-Math.min(...xs), h:Math.max(...ys)-Math.min(...ys)};
 }
 
 export default function App(){
@@ -157,15 +160,47 @@ export default function App(){
   const onPointerUp: React.PointerEventHandler<HTMLCanvasElement> = (e) => { dragState.current=null; (e.currentTarget as any).releasePointerCapture?.(e.pointerId); };
 
   const [toast,setToast]=useState<string|null>(null);
-  const templatesList=[
-    { name:"Paper", url:"/templates/paper.jpg" },
-    { name:"Noise", url:"/templates/noise.jpg" },
-    { name:"Halftone", url:"/templates/halftone.jpg" },
-    { name:"Black", url:"/templates/black.jpg" },
+
+  /** Background templates in /public/templates */
+  const templatesList = [
+    { name: "Paper",          url: "/templates/paper.jpg" },
+    { name: "Noise",          url: "/templates/noise.jpg" },
+    { name: "Halftone",       url: "/templates/halftone.jpg" },
+    { name: "Black",          url: "/templates/black.jpg" },
+    // Your custom templates
+    { name: "Template 1", url: "/templates/mogtemplate1.jpg" },
+    { name: "Template 2", url: "/templates/mogtemplate2.png" },
+    { name: "Template 3", url: "/templates/mogtemplate3.jpg" },
+    { name: "Template 4", url: "/templates/mogtemplate4.png" },
+    { name: "Template 5", url: "/templates/mogtemplate5.png" },
+    { name: "Template 6", url: "/templates/mogtemplate6.png" },
   ];
+
+  /** Predefined Images (stickers) in /public/predefined */
+// Predefined Images (stickers) in /public/predefined
+const predefinedImages: PredefItem[] = [
+  { name: "pic1",  url: "/predefined/pic1.png"  },
+  { name: "pic2",  url: "/predefined/pic2.png"  },
+  { name: "pic3",  url: "/predefined/pic3.png"  },
+  { name: "pic4",  url: "/predefined/pic4.png"  },
+  { name: "pic5",  url: "/predefined/pic5.png"  },
+  { name: "pic6",  url: "/predefined/pic6.png"  },
+  { name: "pic7",  url: "/predefined/pic7.png"  },
+  { name: "pic8",  url: "/predefined/pic8.png"  },
+  { name: "pic9",  url: "/predefined/pic9.png"  },
+  { name: "pic10", url: "/predefined/pic10.png" },
+  { name: "pic11", url: "/predefined/pic11.png" },
+  { name: "pic12", url: "/predefined/pic12.png" },
+  { name: "pic13", url: "/predefined/pic13.jpg" },  // JPG per your folder
+  { name: "pic14", url: "/predefined/pic14.png" },
+  { name: "pic15", url: "/predefined/pic15.png" },
+  { name: "pic17", url: "/predefined/pic17.png" },
+];
+
 
   const addTextLayer=()=>{ const l:TextLayer={id:uid("text"),type:"text",name:"Text",x:0.5,y:0.5,scale:1,opacity:1,text:"NEW TEXT",fontSize:72,strokePx:12,letterSpacing:0,allCaps:true,visible:true}; setLayers(p=>[...p,l]); setSelectedId(l.id); };
   const addImageSticker=(file:File)=>{ if(!file?.type.startsWith("image/")) return; const url=URL.createObjectURL(file); const l:ImageLayer={id:uid("img"),type:"image",name:file.name||"Sticker",src:url,x:0.5,y:0.5,scale:0.6,opacity:1,visible:true}; setLayers(p=>[...p,l]); setSelectedId(l.id); };
+  const addImageStickerFromURL = (url: string, name: string) => { const l:ImageLayer={id:uid("img"),type:"image",name,src:url,x:0.5,y:0.5,scale:0.6,opacity:1,visible:true}; setLayers(p=>[...p,l]); setSelectedId(l.id); };
   const replaceSelectedImage=(file?:File)=>{ if(!selected || selected.type!=="image" || !file) return; setLayers(prev=>prev.map(l=>l.id===selected.id? ({...(l as ImageLayer), src: URL.createObjectURL(file)}) as ImageLayer : l)); };
   const setSelectedProp = <K extends keyof (FaceLayer & TextLayer & ImageLayer)>(key:K, value:any)=>{ if(!selected) return; setLayers(prev=>prev.map(l=>l.id===selected.id? ({...l,[key]:value}) as any : l)); };
 
@@ -236,6 +271,27 @@ export default function App(){
                 </label>
               </div>
             </div>
+
+            {/* Predefined Images gallery (click to add) */}
+            {predefinedImages.length > 0 && (
+              <div className="mt-2">
+                <h3 className="text-sm font-medium mb-2">Predefined images</h3>
+                <div className="grid grid-cols-3 gap-2">
+                  {predefinedImages.map(p => (
+                    <button
+                      key={p.url}
+                      type="button"
+                      onClick={()=>addImageStickerFromURL(p.url, p.name)}
+                      className="rounded-xl overflow-hidden border border-neutral-800 hover:border-neutral-600"
+                      title={p.name}
+                    >
+                      <div className="aspect-square bg-neutral-800" style={{backgroundImage:`url(${p.url})`, backgroundSize:'contain', backgroundPosition:'center', backgroundRepeat:'no-repeat'}} />
+                      <div className="text-xs px-2 py-1 truncate">{p.name}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <ul className="space-y-2 mt-3">
               {layers.map(l=>(
