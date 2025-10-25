@@ -44,6 +44,7 @@ function useImage(src?: string) {
     i.crossOrigin = "anonymous";
     i.onload = () => setImg(i);
     i.src = src;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [src]);
   return img;
 }
@@ -177,31 +178,39 @@ export default function App(){
   ];
 
   /** Predefined Images (stickers) in /public/predefined */
-// Predefined Images (stickers) in /public/predefined
-const predefinedImages: PredefItem[] = [
-  { name: "pic1",  url: "/predefined/pic1.png"  },
-  { name: "pic2",  url: "/predefined/pic2.png"  },
-  { name: "pic3",  url: "/predefined/pic3.png"  },
-  { name: "pic4",  url: "/predefined/pic4.png"  },
-  { name: "pic5",  url: "/predefined/pic5.png"  },
-  { name: "pic6",  url: "/predefined/pic6.png"  },
-  { name: "pic7",  url: "/predefined/pic7.png"  },
-  { name: "pic8",  url: "/predefined/pic8.png"  },
-  { name: "pic9",  url: "/predefined/pic9.png"  },
-  { name: "pic10", url: "/predefined/pic10.png" },
-  { name: "pic11", url: "/predefined/pic11.png" },
-  { name: "pic12", url: "/predefined/pic12.png" },
-  { name: "pic13", url: "/predefined/pic13.jpg" },  // JPG per your folder
-  { name: "pic14", url: "/predefined/pic14.png" },
-  { name: "pic15", url: "/predefined/pic15.png" },
-  { name: "pic17", url: "/predefined/pic17.png" },
-];
-
+  const predefinedImages: PredefItem[] = [
+    { name: "pic1",  url: "/predefined/pic1.png"  },
+    { name: "pic2",  url: "/predefined/pic2.png"  },
+    { name: "pic3",  url: "/predefined/pic3.png"  },
+    { name: "pic4",  url: "/predefined/pic4.png"  },
+    { name: "pic5",  url: "/predefined/pic5.png"  },
+    { name: "pic6",  url: "/predefined/pic6.png"  },
+    { name: "pic7",  url: "/predefined/pic7.png"  },
+    { name: "pic8",  url: "/predefined/pic8.png"  },
+    { name: "pic9",  url: "/predefined/pic9.png"  },
+    { name: "pic10", url: "/predefined/pic10.png" },
+    { name: "pic11", url: "/predefined/pic11.png" },
+    { name: "pic12", url: "/predefined/pic12.png" },
+    { name: "pic13", url: "/predefined/pic13.jpg" },  // JPG per folder
+    { name: "pic14", url: "/predefined/pic14.png" },
+    { name: "pic15", url: "/predefined/pic15.png" },
+    // { name: "pic16", url: "/predefined/pic16.png" }, // 0 KB earlier
+    { name: "pic17", url: "/predefined/pic17.png" },
+    // { name: "pic18", url: "/predefined/pic18.png" },
+    // { name: "pic19", url: "/predefined/pic19.png" }, // 0 KB earlier
+  ];
 
   const addTextLayer=()=>{ const l:TextLayer={id:uid("text"),type:"text",name:"Text",x:0.5,y:0.5,scale:1,opacity:1,text:"NEW TEXT",fontSize:72,strokePx:12,letterSpacing:0,allCaps:true,visible:true}; setLayers(p=>[...p,l]); setSelectedId(l.id); };
   const addImageSticker=(file:File)=>{ if(!file?.type.startsWith("image/")) return; const url=URL.createObjectURL(file); const l:ImageLayer={id:uid("img"),type:"image",name:file.name||"Sticker",src:url,x:0.5,y:0.5,scale:0.6,opacity:1,visible:true}; setLayers(p=>[...p,l]); setSelectedId(l.id); };
   const addImageStickerFromURL = (url: string, name: string) => { const l:ImageLayer={id:uid("img"),type:"image",name,src:url,x:0.5,y:0.5,scale:0.6,opacity:1,visible:true}; setLayers(p=>[...p,l]); setSelectedId(l.id); };
   const replaceSelectedImage=(file?:File)=>{ if(!selected || selected.type!=="image" || !file) return; setLayers(prev=>prev.map(l=>l.id===selected.id? ({...(l as ImageLayer), src: URL.createObjectURL(file)}) as ImageLayer : l)); };
+  const clearStickers = ()=>{ // remove all image layers and clear selection if it was an image
+    setLayers(prev=>{
+      const next = prev.filter(l=>l.type!=="image");
+      if(selectedId && prev.some(l=>l.id===selectedId && l.type==="image")) setSelectedId(null);
+      return next;
+    });
+  };
   const setSelectedProp = <K extends keyof (FaceLayer & TextLayer & ImageLayer)>(key:K, value:any)=>{ if(!selected) return; setLayers(prev=>prev.map(l=>l.id===selected.id? ({...l,[key]:value}) as any : l)); };
 
   const toShareURL=()=>{ const state={width,height,template,bgTemplateURL,bgUploadURL,layers}; const b64=btoa(unescape(encodeURIComponent(JSON.stringify(state)))); return `${location.origin}${location.pathname}#s=${b64}`; };
@@ -269,26 +278,32 @@ const predefinedImages: PredefItem[] = [
                 <label className="px-2 py-1 rounded-xl bg-neutral-800 cursor-pointer">Add image
                   <input type="file" accept="image/*" className="hidden" onChange={e=>{ const f=e.target.files?.[0]; if(f) addImageSticker(f); }}/>
                 </label>
+                <button type="button" onClick={clearStickers} className="px-2 py-1 rounded-xl bg-neutral-800 hover:bg-neutral-700">Clear stickers</button>
               </div>
             </div>
 
             {/* Predefined Images gallery (click to add) */}
             {predefinedImages.length > 0 && (
               <div className="mt-2">
-                <h3 className="text-sm font-medium mb-2">Predefined images</h3>
-                <div className="grid grid-cols-3 gap-2">
-                  {predefinedImages.map(p => (
-                    <button
-                      key={p.url}
-                      type="button"
-                      onClick={()=>addImageStickerFromURL(p.url, p.name)}
-                      className="rounded-xl overflow-hidden border border-neutral-800 hover:border-neutral-600"
-                      title={p.name}
-                    >
-                      <div className="aspect-square bg-neutral-800" style={{backgroundImage:`url(${p.url})`, backgroundSize:'contain', backgroundPosition:'center', backgroundRepeat:'no-repeat'}} />
-                      <div className="text-xs px-2 py-1 truncate">{p.name}</div>
-                    </button>
-                  ))}
+                <h3 className="text-sm font-medium mb-2">
+                  Predefined images <span className="opacity-60">({predefinedImages.length})</span>
+                </h3>
+                {/* Scroll area */}
+                <div className="max-h-72 md:max-h-96 overflow-y-auto pr-1">
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                    {predefinedImages.map(p => (
+                      <button
+                        key={p.url}
+                        type="button"
+                        onClick={()=>addImageStickerFromURL(p.url, p.name)}
+                        className="rounded-xl overflow-hidden border border-neutral-800 hover:border-neutral-600"
+                        title={p.name}
+                      >
+                        <div className="aspect-square bg-neutral-800" style={{backgroundImage:`url(${p.url})`, backgroundSize:'contain', backgroundPosition:'center', backgroundRepeat:'no-repeat'}} />
+                        <div className="text-xs px-2 py-1 truncate">{p.name}</div>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
