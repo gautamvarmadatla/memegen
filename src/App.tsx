@@ -163,12 +163,12 @@ export default function App(){
     { name: "Halftone",       url: "/templates/halftone.jpg" },
     { name: "Black",          url: "/templates/black.jpg" },
     // Your custom MoG templates
-    { name: "MoG Template 1", url: "/templates/mogtemplate1.jpg" },
-    { name: "MoG Template 2", url: "/templates/mogtemplate2.jpg" },
-    { name: "MoG Template 3", url: "/templates/mogtemplate3.jpg" },
-    { name: "MoG Template 4", url: "/templates/mogtemplate4.png" },
-    { name: "MoG Template 5", url: "/templates/mogtemplate5.png" },
-    { name: "MoG Template 6", url: "/templates/mogtemplate6.png" },
+    { name: "Template 1", url: "/templates/mogtemplate1.jpg" },
+    { name: "Template 2", url: "/templates/mogtemplate2.jpg" },
+    { name: "Template 3", url: "/templates/mogtemplate3.jpg" },
+    { name: "Template 4", url: "/templates/mogtemplate4.png" },
+    { name: "Template 5", url: "/templates/mogtemplate5.png" },
+    { name: "Template 6", url: "/templates/mogtemplate6.png" },
   ];
 
   const addTextLayer=()=>{ const l:TextLayer={id:uid("text"),type:"text",name:"Text",x:0.5,y:0.5,scale:1,opacity:1,text:"NEW TEXT",fontSize:72,strokePx:12,letterSpacing:0,allCaps:true,visible:true}; setLayers(p=>[...p,l]); setSelectedId(l.id); };
