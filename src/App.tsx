@@ -13,6 +13,9 @@ type TextLayer = LayerBase & { type: "text"; text: string; fontSize: number; str
 type ImageLayer = LayerBase & { type: "image"; src: string };
 type Layer = FaceLayer | TextLayer | ImageLayer;
 
+/** Optional: predefined image item type */
+type PredefItem = { name: string; url: string };
+
 const MOG_FACE_SVG = encodeURIComponent(`
   <svg xmlns='http://www.w3.org/2000/svg' width='800' height='800' viewBox='0 0 800 800'>
     <g stroke='black' stroke-width='8' fill='none' stroke-linecap='round' stroke-linejoin='round'>
@@ -157,12 +160,14 @@ export default function App(){
   const onPointerUp: React.PointerEventHandler<HTMLCanvasElement> = (e) => { dragState.current=null; (e.currentTarget as any).releasePointerCapture?.(e.pointerId); };
 
   const [toast,setToast]=useState<string|null>(null);
+
+  /** Background templates in /public/templates */
   const templatesList = [
     { name: "Paper",          url: "/templates/paper.jpg" },
     { name: "Noise",          url: "/templates/noise.jpg" },
     { name: "Halftone",       url: "/templates/halftone.jpg" },
     { name: "Black",          url: "/templates/black.jpg" },
-    // Your custom MoG templates
+    // Your custom templates
     { name: "Template 1", url: "/templates/mogtemplate1.jpg" },
     { name: "Template 2", url: "/templates/mogtemplate2.png" },
     { name: "Template 3", url: "/templates/mogtemplate3.jpg" },
@@ -171,8 +176,19 @@ export default function App(){
     { name: "Template 6", url: "/templates/mogtemplate6.png" },
   ];
 
+  /** Predefined Images (stickers) in /public/predefined */
+  const predefinedImages: PredefItem[] = [
+    // Drop your PNG/JPGs into /public/predefined and add them here:
+    { name: "MoG Face Clean",      url: "/predefined/mog-face.png" },
+    { name: "Sunglasses (PNG)",    url: "/predefined/sunglasses.png" },
+    { name: "Speech Bubble 1",     url: "/predefined/speech-bubble-1.png" },
+    { name: "Arrow Thick",         url: "/predefined/arrow-thick.png" },
+    { name: "Starburst Yellow",    url: "/predefined/starburst-yellow.png" }
+  ];
+
   const addTextLayer=()=>{ const l:TextLayer={id:uid("text"),type:"text",name:"Text",x:0.5,y:0.5,scale:1,opacity:1,text:"NEW TEXT",fontSize:72,strokePx:12,letterSpacing:0,allCaps:true,visible:true}; setLayers(p=>[...p,l]); setSelectedId(l.id); };
   const addImageSticker=(file:File)=>{ if(!file?.type.startsWith("image/")) return; const url=URL.createObjectURL(file); const l:ImageLayer={id:uid("img"),type:"image",name:file.name||"Sticker",src:url,x:0.5,y:0.5,scale:0.6,opacity:1,visible:true}; setLayers(p=>[...p,l]); setSelectedId(l.id); };
+  const addImageStickerFromURL = (url: string, name: string) => { const l:ImageLayer={id:uid("img"),type:"image",name,src:url,x:0.5,y:0.5,scale:0.6,opacity:1,visible:true}; setLayers(p=>[...p,l]); setSelectedId(l.id); };
   const replaceSelectedImage=(file?:File)=>{ if(!selected || selected.type!=="image" || !file) return; setLayers(prev=>prev.map(l=>l.id===selected.id? ({...(l as ImageLayer), src: URL.createObjectURL(file)}) as ImageLayer : l)); };
   const setSelectedProp = <K extends keyof (FaceLayer & TextLayer & ImageLayer)>(key:K, value:any)=>{ if(!selected) return; setLayers(prev=>prev.map(l=>l.id===selected.id? ({...l,[key]:value}) as any : l)); };
 
@@ -243,6 +259,27 @@ export default function App(){
                 </label>
               </div>
             </div>
+
+            {/* Predefined Images gallery (click to add) */}
+            {predefinedImages.length > 0 && (
+              <div className="mt-2">
+                <h3 className="text-sm font-medium mb-2">Predefined images</h3>
+                <div className="grid grid-cols-3 gap-2">
+                  {predefinedImages.map(p => (
+                    <button
+                      key={p.url}
+                      type="button"
+                      onClick={()=>addImageStickerFromURL(p.url, p.name)}
+                      className="rounded-xl overflow-hidden border border-neutral-800 hover:border-neutral-600"
+                      title={p.name}
+                    >
+                      <div className="aspect-square bg-neutral-800" style={{backgroundImage:`url(${p.url})`, backgroundSize:'contain', backgroundPosition:'center', backgroundRepeat:'no-repeat'}} />
+                      <div className="text-xs px-2 py-1 truncate">{p.name}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <ul className="space-y-2 mt-3">
               {layers.map(l=>(
