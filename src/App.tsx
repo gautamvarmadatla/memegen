@@ -62,7 +62,7 @@ function orientedRectBBox(cx:number, cy:number, w:number, h:number, rotDeg:numbe
   const a=(rotDeg||0)*Math.PI/180, cos=Math.cos(a), sin=Math.sin(a), hw=w/2, hh=h/2;
   const pts=[[-hw,-hh],[hw,-hh],[hw,hh],[-hw,hh]].map(([x,y])=>({x:cx+x*cos-y*sin,y:cy+x*sin+y*cos}));
   const xs=pts.map(p=>p.x), ys=pts.map(p=>p.y);
-  return {x:Math.min(*xs), y:Math.min(*ys), w:Math.max(*xs)-Math.min(*xs), h:Math.max(*ys)-Math.min(*ys)};
+  return {x:Math.min(...xs), y:Math.min(...ys), w:Math.max(...xs)-Math.min(...xs), h:Math.max(...ys)-Math.min(...ys)};
 }
 
 export default function App(){
